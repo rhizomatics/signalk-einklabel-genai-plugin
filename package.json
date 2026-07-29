@@ -39,7 +39,7 @@
     "lint": "oxlint"
   },
   "dependencies": {
-    "@rhizomatics/signalk-einklabel-plugin": "file:../signalk-einklabel-plugin"
+    "@rhizomatics/signalk-einklabel-plugin": "^1.0.0"
   },
   "devDependencies": {
     "@signalk/server-api": "^2.28.0",
