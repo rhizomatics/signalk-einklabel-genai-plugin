@@ -4,6 +4,8 @@ A companion plugin for [`@rhizomatics/signalk-einklabel-plugin`](https://github.
 
 By default it uses [OpenRouter](https://openrouter.ai), however it can use any of the [Vercel AI SDK providers](https://ai-sdk.dev/providers/ai-sdk-providers) directly, including local LLMs like Ollama.
 
+![Example Forecast](docs/assets/screenshots/example_weather_openai.png)
+
 ## Working Example
 
 This plugin comes with a marine weather forecast example prompt. When installed, and SignalK server restarted, you should see this appear as a template to choose in the main eInk Label plugin.
