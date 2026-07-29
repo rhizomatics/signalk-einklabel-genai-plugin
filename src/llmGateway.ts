@@ -34,6 +34,14 @@ export function loadOptional<M>(moduleName: string): M {
 /** Ollama's own default local listen address - see the `"ollama"` case in `resolveModel` below. */
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434/v1";
 
+/**
+ * OpenRouter's own free-tier routing alias - picks a random model from whichever free models are
+ * currently available, no paid account needed (see README's "Working Example"). Used as `llmModel`'s
+ * fallback only when the provider is (or defaults to) `"openrouter"` - see `resolveModel` below - since
+ * it's meaningless for any other provider.
+ */
+const DEFAULT_OPENROUTER_MODEL = "openrouter/free";
+
 /** Whether `moduleName` resolves at all - cheaper than `loadOptional`, since it never actually evaluates the module. */
 export function isPackageInstalled(moduleName: string): boolean {
   try {
@@ -104,11 +112,11 @@ export function availableProviders(): string[] {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function resolveModel(settings: LlmSettings): any {
-  const model = settings.llmModel;
+  const provider = settings.llmProvider ?? "openrouter";
+  const model = settings.llmModel ?? (provider === "openrouter" ? DEFAULT_OPENROUTER_MODEL : undefined);
   if (!model) {
     throw new Error("no LLM model configured (llmModel)");
   }
-  const provider = settings.llmProvider ?? "openrouter";
 
   const registered = getLlmProvider(provider);
   if (registered) return registered(settings);

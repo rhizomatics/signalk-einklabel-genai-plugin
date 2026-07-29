@@ -22,8 +22,20 @@ test("extractSvg", async (t) => {
 });
 
 test("callLlm", async (t) => {
-  await t.test("rejects immediately when no model is configured, without attempting a network call", async () => {
-    await assert.rejects(callLlm({}, "prompt"), /no LLM model configured/);
+  await t.test(
+    "rejects immediately when no model is configured and the provider has no default model, without attempting a network call",
+    async () => {
+      await assert.rejects(callLlm({ llmProvider: "anthropic" }, "prompt"), /no LLM model configured/);
+    },
+  );
+
+  await t.test('defaults llmModel to "openrouter/free" when llmProvider is (or defaults to) "openrouter" and none is given', async () => {
+    // No real OpenRouter credentials in CI/dev - a short timeout turns the real (network) attempt into a
+    // fast, deterministic failure. The only thing under test is that it got past validation into an
+    // actual call, rather than throwing "no LLM model configured" synchronously.
+    const err = await callLlm({ llmTimeoutSeconds: 1 }, "prompt").catch((e) => e as Error);
+    assert.ok(err instanceof Error);
+    assert.doesNotMatch(err.message, /no LLM model configured/);
   });
 
   await t.test('rejects immediately when llmProvider is "local" with no llmBaseUrl', async () => {

@@ -1,3 +1,7 @@
+# [1.0.3]
+
+- Default model now `openrouter/free`
+
 # [1.0.2]
 
 - AI providers drop-down now restricted to available AI SDK plugins

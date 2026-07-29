@@ -10,6 +10,8 @@ By default it uses [OpenRouter](https://openrouter.ai), however it can use any o
 
 This plugin comes with a marine weather forecast example prompt. When installed, and SignalK server restarted, you should see this appear as a template to choose in the main eInk Label plugin.
 
+If you don't already have an AI account, get a [free API key from OpenRouter](https://openrouter.ai/openrouter/free) - leave the model as `openrouter/free`, OpenRouter's free-tier routing alias, although note you will get a random model every time it is called.
+
 ### Customizing Prompts
 
 Prompts have the same template syntax as the SVG images, so the weather forecast will give the current GPS position, and the length and type of boat.
@@ -18,11 +20,17 @@ All prompts also get a generated appendix to the prompt that gives details about
 
 ### Full Example
 
+#### Forecast
+
 > Summarize the maritime weather outlook for the next 24 hours, appropriate for the sailor of a 13.6m Sailing craft positioned at latitude 40.689247, longitude -74.044502
->
+
+#### Target Guidance
+
+The following has been automatically added to the end of the standard prompt, with information specific to which label is being targetted.
+
 > Generate an SVG image for the result suitable for a ZhunyCo 4.13" eInk Electronic Shelf Label display with pixel height 240 and width 416. Available colours are black (#000000), white (#FFFFFF), red (#FF0000), yellow (#FFFF00). Fonts available are serif, sans-serif, monospace.
 >
-> Use graphics to make it easier to read and use the space better, and use colour and layout to draw attention to safety critical information. Include in minimal size font the source of the information.
+> Use graphics to make it easier to read and use the space better, and use colour and layout to draw attention to safety critical information. Include in minimal size font the source of the information and generation timestamp.
 
 ### CAUTION
 
@@ -55,7 +63,7 @@ Combined with a distilled model, for example Llama 3.2 3B, Phi-4 Mini 3.8B, or Q
 
 - `llmProvider` - `openai`, `anthropic`, `google`, `xai`, `deepseek`, `moonshotai`, `openrouter`, `ollama`, or `local` (any other OpenAI-compatible server). The config screen's dropdown only lists providers whose package is actually installed (`openrouter` always is) - install another one's optional package and reopen the page to add it.
 - `llmApiKey` - not needed for `ollama`/`local` unless your server itself checks one
-- `llmModel` - provider-specific model id, e.g. `gpt-4o`, `claude-sonnet-4-5`, `gemini-2.5-flash`, `grok-4`, or an Ollama/local model tag
+- `llmModel` - provider-specific model id, e.g. `gpt-4o`, `claude-sonnet-4-5`, `gemini-2.5-flash`, `grok-4`, or an Ollama/local model tag. Left blank with `llmProvider` set to `openrouter`, defaults to `openrouter/free`
 - `llmBaseUrl` - required for `local`; optional for `ollama` (defaults to `http://localhost:11434/v1`)
 - `llmTimeoutSeconds`/`llmRetries` - how long to wait, and how many attempts, before giving up (the core plugin then shows its fallback warning)
 - `promptsDir` - where to look for your own `.md` prompt files, same convention as the core plugin's `templatesDir` (empty for the default, a relative path resolves against `~/.signalk`, absolute used as-is)

@@ -66,7 +66,10 @@ export function createPlugin(app: ServerAPI): Plugin {
           type: "string",
           title: "LLM model",
           description:
-            'Provider-specific model id/name, e.g. "gpt-4o", "claude-sonnet-4-5", "gemini-2.5-flash", "grok-4", or an Ollama/local model tag.',
+            'Provider-specific model id/name, e.g. "gpt-4o", "claude-sonnet-4-5", "gemini-2.5-flash", "grok-4", or an Ollama/local model tag. ' +
+            'Left blank with "LLM provider" set to "openrouter", defaults to "openrouter/free" - OpenRouter\'s free-tier routing alias, picking ' +
+            "a random free model each call, no paid account needed.",
+          default: "openrouter/free",
         },
         llmBaseUrl: {
           type: "string",
