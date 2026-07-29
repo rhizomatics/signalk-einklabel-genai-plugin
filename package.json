@@ -1,6 +1,6 @@
 {
   "name": "@rhizomatics/signalk-einklabel-genai-plugin",
-  "version": "0.1.3",
+  "version": "0.3.0",
   "description": "GenAI prompt generated labels for the eInk Electronic Shelf Label plugin. Contributes prompts as an alternative to hand-authored SVG templates.",
   "keywords": [
     "eink",
