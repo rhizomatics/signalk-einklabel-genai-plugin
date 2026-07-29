@@ -10,19 +10,7 @@ By default it uses [OpenRouter](https://openrouter.ai), however it can use any o
 
 This plugin comes with a marine weather forecast example prompt. When installed, and SignalK server restarted, you should see this appear as a template to choose in the main eInk Label plugin.
 
-### Testing on your server
-
-If you don't already have an AI account, get a [free API key from OpenRouter](https://openrouter.ai/openrouter/free) - set the _model_ to one of the [specific free models](https://openrouter.ai/openrouter/free), or `openrouter/free`, OpenRouter's free-tier routing alias, although note you will get a random model every time it is called, some of which are specialized (e.g. "content safety") and will not generate an image. Free models may not lookup web pages or APIs, so guess things like weather, and the image quality will likely be much poorer than using a mainstream LLM.
-
-Use the `esl-cli` CLI to see generated prompts or create test PNGs.
-
-### Customizing Prompts
-
-Prompts have the same template syntax as the SVG images, so the weather forecast will give the current GPS position, and the length and type of boat.
-
-All prompts also get a generated appendix to the prompt that gives details about the eInk label, including manufacturer, name, pixel height and width, colour range, and the description provided in the main plugin.
-
-### Full Example
+### Expanded Example
 
 #### Forecast
 
@@ -39,6 +27,18 @@ The following has been automatically added to the end of the standard prompt, wi
 ### CAUTION
 
 Be careful with GenAI generated content, it will often be very good but may be prone to hallucinations or omissions.
+
+### Testing on your server
+
+If you don't already have an AI account, get a [free API key from OpenRouter](https://openrouter.ai/openrouter/free) - set the _model_ to one of the [specific free models](https://openrouter.ai/openrouter/free), or `openrouter/free`, OpenRouter's free-tier routing alias, although note you will get a random model every time it is called, some of which are specialized (e.g. "content safety") and will not generate an image. Free models may not lookup web pages or APIs, so guess things like weather, and the image quality will likely be much poorer than using a mainstream LLM.
+
+Use the `esl-cli` CLI to see generated prompts or create test PNGs.
+
+### Customizing Prompts
+
+Prompts have the same template syntax as the SVG images, so the weather forecast will give the current GPS position, and the length and type of boat.
+
+All prompts also get a generated appendix to the prompt that gives details about the eInk label, including manufacturer, name, pixel height and width, colour range, and the description provided in the main plugin.
 
 ## Installation
 
