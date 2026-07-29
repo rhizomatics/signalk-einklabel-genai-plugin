@@ -1,0 +1,74 @@
+{
+  "name": "@rhizomatics/signalk-einklabel-genai-plugin",
+  "version": "0.1.0",
+  "description": "GenAI prompt generated labels for the eInk Electronic Shelf Label plugin. Contributes prompts as an alternative to hand-authored SVG templates.",
+  "keywords": [
+    "eink",
+    "esl",
+    "genai",
+    "llm",
+    "signalk-category-hardware",
+    "signalk-category-instruments",
+    "signalk-node-server-plugin"
+  ],
+  "homepage": "https://github.com/rhizomatics/signalk-einklabel-genai-plugin",
+  "bugs": {
+    "url": "https://github.com/rhizomatics/signalk-einklabel-genai-plugin/issues"
+  },
+  "license": "APACHE-2.0",
+  "author": "jey burrows",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhizomatics/signalk-einklabel-genai-plugin.git"
+  },
+  "files": [
+    "dist",
+    "prompts",
+    "README.md"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "node scripts/run-tests.js",
+    "coverage": "node scripts/run-tests.js --coverage",
+    "prepublishOnly": "npm run build",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint"
+  },
+  "dependencies": {
+    "@rhizomatics/signalk-einklabel-plugin": "file:../signalk-einklabel-plugin"
+  },
+  "devDependencies": {
+    "@signalk/server-api": "^2.28.0",
+    "@types/node": "^20.14.0",
+    "commander": "^12.1.0",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
+    "oxlint-tsgolint": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  },
+  "optionalDependencies": {
+    "@ai-sdk/anthropic": "^4.0.21",
+    "@ai-sdk/deepseek": "^3.0.13",
+    "@ai-sdk/google": "^4.0.24",
+    "@ai-sdk/moonshotai": "^3.0.17",
+    "@ai-sdk/openai": "^4.0.20",
+    "@ai-sdk/openai-compatible": "^3.0.14",
+    "@ai-sdk/xai": "^4.0.18",
+    "ai": "^7.0.37",
+    "ai-sdk-ollama": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "signalk": {
+    "displayName": "eInk Label GenAI Rendering",
+    "requires": [
+      "@rhizomatics/signalk-einklabel-plugin"
+    ]
+  }
+}

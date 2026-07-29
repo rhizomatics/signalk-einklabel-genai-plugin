@@ -1,0 +1,1 @@
+Summarize the maritime weather outlook for the next 24 hours, appropriate for the sailor of a {design.length.overall}m {design.aisShipType.name} craft positioned at latitude {navigation.position.latitude}, longitude {navigation.position.longitude}
