@@ -41,6 +41,12 @@ npm install ai @ai-sdk/openai-compatible  # llmProvider: "local" (LM Studio, vLL
 
 If the package for your configured provider isn't installed, a GenAI-backed device falls back to the core plugin's warning template with a log message naming exactly which package to `npm install`.
 
+### Local LLMs
+
+Many Raspberry Pi type tiny computers either have an onboard NPU for AI work, or an add-on 'hat', like the [Raspberry Pi AI Kit](https://www.raspberrypi.com/products/ai-kit/).
+
+Combined with a distilled model, for example Llama 3.2 3B, Phi-4 Mini 3.8B, or Qwen3.5-4B, it is possible to have something reasonable in 8Gb, and the eInk use case is ideal, since it runs in the background a couple of times a day, so slow token generation isn't an issue.
+
 ## Configuration
 
 - `llmProvider` - `openai`, `anthropic`, `google`, `xai`, `deepseek`, `moonshotai`, `openrouter`, `ollama`, or `local` (any other OpenAI-compatible server)
