@@ -16,13 +16,13 @@ All prompts also get a generated appendix to the prompt that gives details about
 
 ### Full Example
 
-```markdown
-Summarize the maritime weather outlook for the next 24 hours, appropriate for the sailor of a 13.6m Sailing craft positioned at latitude 40.689247, longitude -74.044502
+> Summarize the maritime weather outlook for the next 24 hours, appropriate for the sailor of a 13.6m Sailing craft positioned at latitude 40.689247, longitude -74.044502
+>
+> Generate an SVG image for the result suitable for a ZhunyCo 4.13" eInk Electronic Shelf Label display with pixel height 240 and width 416. Available colours are black (#000000), white (#FFFFFF), red (#FF0000), yellow (#FFFF00). Fonts available are serif, sans-serif, monospace.
+>
+> Use graphics to make it easier to read and use the space better, and use colour and layout to draw attention to safety critical information. Include in minimal size font the source of the information.
 
-Generate an SVG image for the result suitable for a ZhunyCo 4.13" eInk Electronic Shelf Label display with pixel height 240 and width 416. Available colours are black (#000000), white (#FFFFFF), red (#FF0000), yellow (#FFFF00). Fonts available are serif, sans-serif, monospace.
-
-Use graphics to make it easier to read and use the space better, and use colour and layout to draw attention to safety critical information. Include in minimal size font the source of the information.
-```
+CAUTION: Be careful with GenAI generated content, it will often be very good but may be prone to hallucinations or omissions.
 
 ## Installation
 
