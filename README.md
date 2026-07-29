@@ -26,7 +26,7 @@ Use graphics to make it easier to read and use the space better, and use colour 
 
 ## Installation
 
-Install both plugins from the SignalK AppStore (or `npm install @rhizomatics/signalk-einklabel-plugin @rhizomatics/signalk-einklabel-genai-plugin`), then install whichever LLM provider package(s) you'll actually use - these are `optionalDependencies`, not installed automatically, since a user only ever needs one. `openrouter` is the one exception: `@openrouter/ai-sdk-provider` is a regular `dependency`, so it's already installed and needs no extra step, as is the base `ai` package:
+Install both plugins from the SignalK AppStore (or `npm install @rhizomatics/signalk-einklabel-plugin @rhizomatics/signalk-einklabel-genai-plugin`), then install whichever LLM provider package(s) you'll actually use - these are `optionalDependencies`, not installed automatically, since most people will likely only ever need one. `openrouter` is the one exception: `@openrouter/ai-sdk-provider` is a regular `dependency`, so it's already installed and needs no extra step, as is the base `ai` package:
 
 ```bash
 npm install ai @ai-sdk/openai          # llmProvider: "openai"

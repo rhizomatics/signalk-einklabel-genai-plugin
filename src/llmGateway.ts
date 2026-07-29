@@ -9,7 +9,7 @@ export type LlmSettings = RegistryLlmSettings & { llmTimeoutSeconds?: number };
 
 /**
  * `ai` and every `@ai-sdk/*`/`ai-sdk-ollama` provider package (other than `@openrouter/ai-sdk-provider`,
- * see below) are `optionalDependencies` (see package.json), not plain `dependencies` - a user picks
+ * see below) are `optionalDependencies` (see package.json), not plain `dependencies` - user picks
  * exactly one provider, so there's no reason to force every one of them to install, and an install that
  * fails to fetch one it doesn't even use (a network hiccup, `npm install --omit=optional`, an unsupported
  * platform) must not break this plugin for everyone else. That means every reference to one of these
