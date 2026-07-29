@@ -79,7 +79,7 @@
     "node": ">=18"
   },
   "signalk": {
-    "displayName": "eInk Label GenAI Rendering",
+    "displayName": "eInk Label GenAI Templates",
     "appIcon": "docs/assets/icons/icon_tmp.png",
     "screenshots": [
       "docs/assets/screenshots/example_weather_openai.png"

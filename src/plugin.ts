@@ -40,7 +40,7 @@ export function createPlugin(app: ServerAPI): Plugin {
 
   return {
     id: "signalk-einklabel-genai-plugin",
-    name: "eInk Label GenAI Rendering",
+    name: "eInk Label GenAI Templates",
     description: "Contributes LLM-generated prompts as an alternative to hand-authored SVG templates for signalk-einklabel-plugin",
     schema: () => ({
       type: "object",
