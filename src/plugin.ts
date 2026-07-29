@@ -1,7 +1,33 @@
 import { Plugin, ServerAPI } from "@signalk/server-api";
 import esl from "@rhizomatics/signalk-einklabel-plugin";
 import { defaultConfig, PluginConfig } from "./config";
+import { availableProviders, callLlm } from "./llmGateway";
+import { withRetries } from "./retry";
 import { createTemplateProvider } from "./templateProvider";
+
+/** Sent by the `testConnection` checkbox - short and cheap on tokens, just enough to prove the round trip works. */
+const TEST_PROMPT = 'Reply with exactly the word "OK", nothing else.';
+
+/**
+ * Runs one test call against `config`'s LLM settings and reports the outcome via
+ * `setPluginStatus`/`setPluginError` - both shown on the server's Plugin Config page - then clears the
+ * one-shot `testConnection` flag via `savePluginOptions` so it doesn't refire on the next ordinary
+ * restart. Fire-and-forget from `start()`: failures are reported through `setPluginError`, not thrown,
+ * since nothing in `start()`'s own contract is waiting on this.
+ */
+async function runConnectionTest(app: ServerAPI, config: PluginConfig): Promise<void> {
+  const label = `${config.llmProvider ?? "openrouter"}/${config.llmModel ?? "(no model configured)"}`;
+  try {
+    const reply = await withRetries(config.llmRetries, () => callLlm(config, TEST_PROMPT));
+    app.setPluginStatus(`LLM test OK (${label}): ${reply.trim().slice(0, 200)}`);
+  } catch (err) {
+    app.setPluginError(`LLM test failed (${label}): ${(err as Error).message}`);
+  } finally {
+    app.savePluginOptions({ ...config, testConnection: false }, (err) => {
+      if (err) app.debug(`failed to clear testConnection flag: ${err.message}`);
+    });
+  }
+}
 
 export function createPlugin(app: ServerAPI): Plugin {
   // Updated by `start()` on every (re)start - `createTemplateProvider`'s functions all read through
@@ -23,11 +49,12 @@ export function createPlugin(app: ServerAPI): Plugin {
           type: "string",
           title: "LLM provider",
           description:
-            'Which LLM gateway to call - "OpenRouter" is bundled and needs no extra install; every other option ' +
-            "(other than local/ollama) needs its own optional npm package installed, e.g. `npm install ai @ai-sdk/anthropic` " +
-            '(see README). "Ollama" defaults to a local Ollama server with no further config; "Local" is any other ' +
-            'OpenAI-compatible endpoint (e.g. LM Studio) and needs "LLM base URL" below.',
-          enum: ["openrouter", "openai", "anthropic", "google", "xai", "deepseek", "moonshotai", "ollama", "local"],
+            "Which LLM gateway to call - only providers whose npm package is actually installed are listed here; " +
+            "install another one's optional package (e.g. `npm install ai @ai-sdk/anthropic`, see README) and reopen " +
+            'this page to add it. "OpenRouter" is bundled and needs no extra install. "Ollama" defaults to a local ' +
+            'Ollama server with no further config; "Local" is any other OpenAI-compatible endpoint (e.g. LM Studio) ' +
+            'and needs "LLM base URL" below.',
+          enum: availableProviders(),
           default: "openrouter",
         },
         llmApiKey: {
@@ -72,12 +99,24 @@ export function createPlugin(app: ServerAPI): Plugin {
             'picker, suffixed "(GenAI)".',
           default: defaultConfig().promptsDir,
         },
+        testConnection: {
+          type: "boolean",
+          title: "Test connection now",
+          description:
+            "Check this and save to send one test message to the LLM settings above as soon as the plugin (re)starts. " +
+            "Watch this plugin's entry on the Plugin Config page for the result (success or the error) - the checkbox " +
+            "clears itself afterwards, so it won't refire on the next ordinary restart.",
+          default: false,
+        },
       },
     }),
     uiSchema: () => ({ llmApiKey: { "ui:widget": "password" } }),
     start(config: object) {
       currentConfig = { ...defaultConfig(), ...(config as Partial<PluginConfig>) };
       app.debug(`eInk Label GenAI plugin started (llmProvider=${currentConfig.llmProvider ?? "openrouter"})`);
+      if (currentConfig.testConnection) {
+        runConnectionTest(app, currentConfig).catch((err) => app.debug(`connection test failed unexpectedly: ${(err as Error).message}`));
+      }
     },
     stop() {},
   };

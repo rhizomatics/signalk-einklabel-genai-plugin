@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { callLlm, extractSvg, loadOptional } from "./llmGateway";
+import { availableProviders, callLlm, extractSvg, isPackageInstalled, loadOptional } from "./llmGateway";
+import { registerLlmProvider } from "./llmProviderRegistry";
 
 test("extractSvg", async (t) => {
   await t.test("returns the svg document unchanged when it's already bare", () => {
@@ -55,5 +56,33 @@ test("loadOptional", async (t) => {
   await t.test("returns the module's exports when it is installed", () => {
     const ai = loadOptional<{ generateText: unknown }>("ai");
     assert.equal(typeof ai.generateText, "function");
+  });
+});
+
+test("isPackageInstalled", async (t) => {
+  await t.test("true for a package that resolves", () => {
+    assert.equal(isPackageInstalled("ai"), true);
+  });
+
+  await t.test("false for a package nothing installed", () => {
+    assert.equal(isPackageInstalled("@ai-sdk/definitely-not-installed"), false);
+  });
+});
+
+test("availableProviders", async (t) => {
+  await t.test("always includes openrouter, the one bundled as a regular dependency", () => {
+    assert.ok(availableProviders().includes("openrouter"));
+  });
+
+  await t.test("includes a built-in provider whose optional package is installed", () => {
+    // Every optionalDependency is installed in this dev/CI environment - see package.json.
+    assert.ok(availableProviders().includes("anthropic"));
+    assert.ok(availableProviders().includes("ollama"));
+    assert.ok(availableProviders().includes("local"));
+  });
+
+  await t.test("includes a name registered via registerLlmProvider, which has no package to check", () => {
+    registerLlmProvider("available-providers-test-custom", () => "fake-model");
+    assert.ok(availableProviders().includes("available-providers-test-custom"));
   });
 });

@@ -1,3 +1,8 @@
+# [1.0.2]
+
+- AI providers drop-down now restricted to available AI SDK plugins
+- Test option added to validate AI configuration, keys and connectivity
+
 # [1.0.1]
 
 - Packaging fixes

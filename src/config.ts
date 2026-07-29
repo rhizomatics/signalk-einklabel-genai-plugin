@@ -33,6 +33,13 @@ export interface PluginConfig {
    * absolute path. Use `resolvePromptsDir` to turn this into an actual path.
    */
   promptsDir: string;
+  /**
+   * When `true`, `start()` sends one test message to the configured LLM and reports the result via
+   * `app.setPluginStatus`/`setPluginError` (visible on the server's Plugin Config page) - then clears
+   * itself back to `false` via `savePluginOptions` so it doesn't refire on every ordinary restart. Not
+   * a persistent setting, just a one-shot "test connection now" checkbox - see `plugin.ts`'s `start()`.
+   */
+  testConnection?: boolean;
 }
 
 /**

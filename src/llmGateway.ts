@@ -1,6 +1,8 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { PluginConfig } from "./config";
-import { getLlmProvider, LlmSettings as RegistryLlmSettings } from "./llmProviderRegistry";
+import { getLlmProvider, listRegisteredProviders, LlmSettings as RegistryLlmSettings } from "./llmProviderRegistry";
 
 // `llmTimeoutSeconds` is optional here (unlike on `PluginConfig`, where `defaultConfig()` always sets
 // it) since `callLlm` below defaults it itself - useful for the CLI's `generate` command and tests that
@@ -31,6 +33,60 @@ export function loadOptional<M>(moduleName: string): M {
 
 /** Ollama's own default local listen address - see the `"ollama"` case in `resolveModel` below. */
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434/v1";
+
+/** Whether `moduleName` resolves at all - cheaper than `loadOptional`, since it never actually evaluates the module. */
+export function isPackageInstalled(moduleName: string): boolean {
+  try {
+    require.resolve(moduleName);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A package name from this plugin's own `optionalDependencies` doesn't always match the `llmProvider`
+ * id `resolveModel`'s switch uses it for: `ai-sdk-ollama` isn't under the `@ai-sdk/` scope at all, and
+ * `@ai-sdk/openai-compatible` backs `"local"`, not a provider literally named "openai-compatible".
+ * Every other optional package *does* match `@ai-sdk/<id>` (see `resolveModel`'s cases), so only these
+ * two irregular ones need spelling out - everything else is derived by stripping the scope below.
+ */
+const PACKAGE_TO_PROVIDER_ID: Record<string, string> = {
+  "ai-sdk-ollama": "ollama",
+  "@ai-sdk/openai-compatible": "local",
+};
+
+/** Preferred dropdown order - purely cosmetic; anything not listed here (a future package, a custom-registered name) sorts after these, alphabetically. */
+const PROVIDER_DISPLAY_ORDER = ["openrouter", "openai", "anthropic", "google", "xai", "deepseek", "moonshotai", "ollama", "local"];
+
+function byDisplayOrder(a: string, b: string): number {
+  const ai = PROVIDER_DISPLAY_ORDER.indexOf(a);
+  const bi = PROVIDER_DISPLAY_ORDER.indexOf(b);
+  if (ai === -1 && bi === -1) return a.localeCompare(b);
+  if (ai === -1 || bi === -1) return ai === -1 ? 1 : -1;
+  return ai - bi;
+}
+
+/**
+ * Every `llmProvider` name actually usable right now, for the plugin config screen's `llmProvider`
+ * dropdown (`plugin.ts`'s `schema()`) - so a provider whose package isn't installed doesn't even show
+ * up as pickable. Rather than a second hardcoded provider-to-package table duplicating `resolveModel`'s
+ * switch, this reads this plugin's own `optionalDependencies` straight out of `package.json` (the
+ * actual, already-curated list of installable provider packages - `require.resolve`-able but never
+ * `require()`'d, so a failed optional install can't crash this) and checks each with `isPackageInstalled`.
+ * `"openrouter"` is always included (it's a regular `dependency`, see this module's top doc comment);
+ * any name added via `registerLlmProvider` is included unconditionally too, since there's no package to
+ * check for those.
+ */
+export function availableProviders(): string[] {
+  const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8")) as {
+    optionalDependencies?: Record<string, string>;
+  };
+  const installed = Object.keys(packageJson.optionalDependencies ?? {})
+    .filter(isPackageInstalled)
+    .map((pkg) => PACKAGE_TO_PROVIDER_ID[pkg] ?? pkg.replace(/^@ai-sdk\//, ""));
+  return [...new Set(["openrouter", ...installed, ...listRegisteredProviders()])].sort(byDisplayOrder);
+}
 
 /**
  * Resolves `settings` to a Vercel AI SDK model handle. Checks `registerLlmProvider`'s registry

@@ -35,3 +35,8 @@ export function registerLlmProvider(name: string, factory: LlmProviderFactory): 
 export function getLlmProvider(name: string): LlmProviderFactory | undefined {
   return providers.get(name);
 }
+
+/** Names of every custom provider registered via `registerLlmProvider` - see `llmGateway.ts`'s `availableProviders`. */
+export function listRegisteredProviders(): string[] {
+  return [...providers.keys()];
+}

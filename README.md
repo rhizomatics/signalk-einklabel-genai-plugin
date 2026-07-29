@@ -49,12 +49,13 @@ Combined with a distilled model, for example Llama 3.2 3B, Phi-4 Mini 3.8B, or Q
 
 ## Configuration
 
-- `llmProvider` - `openai`, `anthropic`, `google`, `xai`, `deepseek`, `moonshotai`, `openrouter`, `ollama`, or `local` (any other OpenAI-compatible server)
+- `llmProvider` - `openai`, `anthropic`, `google`, `xai`, `deepseek`, `moonshotai`, `openrouter`, `ollama`, or `local` (any other OpenAI-compatible server). The config screen's dropdown only lists providers whose package is actually installed (`openrouter` always is) - install another one's optional package and reopen the page to add it.
 - `llmApiKey` - not needed for `ollama`/`local` unless your server itself checks one
 - `llmModel` - provider-specific model id, e.g. `gpt-4o`, `claude-sonnet-4-5`, `gemini-2.5-flash`, `grok-4`, or an Ollama/local model tag
 - `llmBaseUrl` - required for `local`; optional for `ollama` (defaults to `http://localhost:11434/v1`)
 - `llmTimeoutSeconds`/`llmRetries` - how long to wait, and how many attempts, before giving up (the core plugin then shows its fallback warning)
 - `promptsDir` - where to look for your own `.md` prompt files, same convention as the core plugin's `templatesDir` (empty for the default, a relative path resolves against `~/.signalk`, absolute used as-is)
+- `testConnection` - not a persistent setting, just a one-shot checkbox: check it and save to send one test message to the LLM settings above as soon as the plugin (re)starts. The result (success, or the error) shows up on this plugin's own entry on the Plugin Config page - the checkbox clears itself afterwards, so it won't refire on the next ordinary restart.
 
 ## Writing Prompts
 

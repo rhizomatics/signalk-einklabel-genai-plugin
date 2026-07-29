@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getLlmProvider, registerLlmProvider } from "./llmProviderRegistry";
+import { getLlmProvider, listRegisteredProviders, registerLlmProvider } from "./llmProviderRegistry";
 
 test("llmProviderRegistry", async (t) => {
   await t.test("returns undefined for a provider name nothing has registered", () => {
@@ -18,5 +18,10 @@ test("llmProviderRegistry", async (t) => {
     const second = () => "second";
     registerLlmProvider("replaceable", second);
     assert.equal(getLlmProvider("replaceable"), second);
+  });
+
+  await t.test("listRegisteredProviders includes a name that was registered", () => {
+    registerLlmProvider("listed-provider", () => "fake-model");
+    assert.ok(listRegisteredProviders().includes("listed-provider"));
   });
 });
