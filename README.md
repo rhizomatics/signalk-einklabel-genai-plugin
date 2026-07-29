@@ -24,7 +24,9 @@ All prompts also get a generated appendix to the prompt that gives details about
 >
 > Use graphics to make it easier to read and use the space better, and use colour and layout to draw attention to safety critical information. Include in minimal size font the source of the information.
 
-CAUTION: Be careful with GenAI generated content, it will often be very good but may be prone to hallucinations or omissions.
+### CAUTION
+
+Be careful with GenAI generated content, it will often be very good but may be prone to hallucinations or omissions.
 
 ## Installation
 
