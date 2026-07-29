@@ -1,9 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
+import { ServerAPI } from "@signalk/server-api";
 import esl from "@rhizomatics/signalk-einklabel-plugin";
 import { withRetries } from "./retry";
 import { PluginConfig, promptNameOptions, resolvePromptPath, resolvePromptsDir } from "./config";
-import { callLlm, extractSvg, LlmSettings } from "./llmGateway";
+import { callLlm, extractSvg, isOpenRouterProvider, LlmSettings } from "./llmGateway";
 
 /** Appended to every prompt name this plugin offers in the core plugin's "Template" dropdown. */
 export const SUFFIX = "(GenAI)";
@@ -21,7 +22,7 @@ function promptNameFor(templateName: string): string {
  * current `promptsDir` fresh each time, rather than once at startup, so adding/editing a `.md` prompt
  * file takes effect without a plugin restart - same as the core plugin's own template directory.
  */
-export function createTemplateProvider(getConfig: () => PluginConfig): esl.TemplateProvider {
+export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginConfig): esl.TemplateProvider {
   function promptsDir(): string {
     return resolvePromptsDir(getConfig().promptsDir);
   }
@@ -64,8 +65,20 @@ export function createTemplateProvider(getConfig: () => PluginConfig): esl.Templ
         llmBaseUrl: config.llmBaseUrl,
         llmTimeoutSeconds: config.llmTimeoutSeconds,
       };
-      const raw = await withRetries(config.llmRetries, () => callLlm(llmSettings, prompt));
-      const svg = extractSvg(raw);
+      // `extractSvg` runs inside the retry loop, not after it - an unparseable response (the model
+      // wrapped its SVG oddly, got cut off, whatever) gets a fresh attempt the same way a network/
+      // timeout failure does, rather than failing the whole render on one bad completion.
+      const {
+        text: svg,
+        model,
+        usage,
+      } = await withRetries(config.llmRetries, async () => {
+        const result = await callLlm(llmSettings, prompt);
+        return { ...result, text: extractSvg(result.text) };
+      });
+      if (isOpenRouterProvider(config.llmProvider)) {
+        app.debug(`openrouter model=${model ?? "unknown"} usage=${JSON.stringify(usage)}`);
+      }
 
       const renderer = new esl.Renderer();
       // `esl.Renderer.render()` reads its template from a file path, not a string - the LLM's SVG is

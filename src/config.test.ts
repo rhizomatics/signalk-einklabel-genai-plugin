@@ -7,7 +7,7 @@ import { defaultConfig, DEFAULT_PROMPT_NAME, promptNameOptions, resolvePromptPat
 
 test("defaultConfig has sane defaults", () => {
   const defaults = defaultConfig();
-  assert.equal(defaults.llmTimeoutSeconds, 30);
+  assert.equal(defaults.llmTimeoutSeconds, 60);
   assert.equal(defaults.llmRetries, 2);
   assert.equal(defaults.promptsDir, "");
 });

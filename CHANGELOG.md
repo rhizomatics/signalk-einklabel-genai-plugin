@@ -1,6 +1,9 @@
 # [1.0.3]
 
-- Default model now `openrouter/free`
+- Update timeout to 60 seconds to handle slower local or free models
+- Better handle retry for responses that don't have cleanly extractable SVG
+- OpenRouter model and token usage now logged
+- Strip HTML punctuation that breaks XML before converting SVG
 
 # [1.0.2]
 

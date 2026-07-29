@@ -58,7 +58,7 @@ const DEFAULT_PROMPTS_DIR = join(SIGNALK_HOME_DIR, "einklabel-genai", "prompts")
 
 export function defaultConfig(): PluginConfig {
   return {
-    llmTimeoutSeconds: 30,
+    llmTimeoutSeconds: 60,
     llmRetries: 2,
     promptsDir: "",
   };

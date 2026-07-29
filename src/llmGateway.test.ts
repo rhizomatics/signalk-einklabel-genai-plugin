@@ -19,23 +19,35 @@ test("extractSvg", async (t) => {
   await t.test("throws when there's no <svg>...</svg> document at all", () => {
     assert.throws(() => extractSvg("sorry, I can't do that"), /did not contain/);
   });
+
+  await t.test("includes the raw response in the error, for debugging an unprocessable reply", () => {
+    assert.throws(() => extractSvg("sorry, I can't do that"), /first 512 chars: sorry, I can't do that/);
+  });
+
+  await t.test("truncates a long raw response to the first 512 chars in the error", () => {
+    const raw = "x".repeat(1000);
+    assert.throws(
+      () => extractSvg(raw),
+      (err: unknown) => {
+        const message = (err as Error).message;
+        assert.match(message, /first 512 chars: x{512}$/);
+        return true;
+      },
+    );
+  });
+
+  await t.test("replaces &nbsp; with a literal U+00A0, since it isn't a predefined XML entity and breaks strict XML parsing", () => {
+    assert.equal(extractSvg("<svg>a&nbsp;b</svg>"), "<svg>a b</svg>");
+  });
+
+  await t.test("replaces &nbsp; case-insensitively", () => {
+    assert.equal(extractSvg("<svg>a&NBSP;b</svg>"), "<svg>a b</svg>");
+  });
 });
 
 test("callLlm", async (t) => {
-  await t.test(
-    "rejects immediately when no model is configured and the provider has no default model, without attempting a network call",
-    async () => {
-      await assert.rejects(callLlm({ llmProvider: "anthropic" }, "prompt"), /no LLM model configured/);
-    },
-  );
-
-  await t.test('defaults llmModel to "openrouter/free" when llmProvider is (or defaults to) "openrouter" and none is given', async () => {
-    // No real OpenRouter credentials in CI/dev - a short timeout turns the real (network) attempt into a
-    // fast, deterministic failure. The only thing under test is that it got past validation into an
-    // actual call, rather than throwing "no LLM model configured" synchronously.
-    const err = await callLlm({ llmTimeoutSeconds: 1 }, "prompt").catch((e) => e as Error);
-    assert.ok(err instanceof Error);
-    assert.doesNotMatch(err.message, /no LLM model configured/);
+  await t.test("rejects immediately when no model is configured, without attempting a network call", async () => {
+    await assert.rejects(callLlm({}, "prompt"), /no LLM model configured/);
   });
 
   await t.test('rejects immediately when llmProvider is "local" with no llmBaseUrl', async () => {

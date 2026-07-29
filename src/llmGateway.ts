@@ -34,14 +34,6 @@ export function loadOptional<M>(moduleName: string): M {
 /** Ollama's own default local listen address - see the `"ollama"` case in `resolveModel` below. */
 const DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434/v1";
 
-/**
- * OpenRouter's own free-tier routing alias - picks a random model from whichever free models are
- * currently available, no paid account needed (see README's "Working Example"). Used as `llmModel`'s
- * fallback only when the provider is (or defaults to) `"openrouter"` - see `resolveModel` below - since
- * it's meaningless for any other provider.
- */
-const DEFAULT_OPENROUTER_MODEL = "openrouter/free";
-
 /** Whether `moduleName` resolves at all - cheaper than `loadOptional`, since it never actually evaluates the module. */
 export function isPackageInstalled(moduleName: string): boolean {
   try {
@@ -112,11 +104,11 @@ export function availableProviders(): string[] {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function resolveModel(settings: LlmSettings): any {
-  const provider = settings.llmProvider ?? "openrouter";
-  const model = settings.llmModel ?? (provider === "openrouter" ? DEFAULT_OPENROUTER_MODEL : undefined);
+  const model = settings.llmModel;
   if (!model) {
     throw new Error("no LLM model configured (llmModel)");
   }
+  const provider = settings.llmProvider ?? "openrouter";
 
   const registered = getLlmProvider(provider);
   if (registered) return registered(settings);
@@ -164,19 +156,47 @@ function resolveModel(settings: LlmSettings): any {
   }
 }
 
+/** Token counts for one `callLlm` call, straight off the Vercel AI SDK's own normalized `usage` - see `CallLlmResult`. */
+export interface LlmUsage {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+}
+
 /**
- * Calls the configured LLM gateway with `prompt`, returning its raw text response - not yet extracted/
- * validated as SVG, see `extractSvg`. Wrapped in its own timeout (`AbortController`) since this is the
- * one genuinely slow/unreliable network call in this plugin.
+ * `callLlm`'s result - `text` is the raw response (not yet extracted/validated as SVG, see `extractSvg`).
+ * `model`/`usage` are mainly useful for `"openrouter"`, where `llmModel` is often a routing alias (e.g.
+ * the `"openrouter/free"` default - see `DEFAULT_OPENROUTER_MODEL`) that resolves to a *different* actual
+ * model each call - callers that care (see `isOpenRouterProvider`) can log which one actually answered
+ * and how many tokens it used.
  */
-export async function callLlm(settings: LlmSettings, prompt: string): Promise<string> {
-  const model = resolveModel(settings);
+export interface CallLlmResult {
+  text: string;
+  model?: string;
+  usage?: LlmUsage;
+}
+
+/** Whether `provider` (or its default) is `"openrouter"` - gates the model/usage debug logging `CallLlmResult` exists for for, since that detail is really only interesting there (see `CallLlmResult`'s doc comment). */
+export function isOpenRouterProvider(provider?: string): boolean {
+  return (provider ?? "openrouter") === "openrouter";
+}
+
+/**
+ * Calls the configured LLM gateway with `prompt`. Wrapped in its own timeout (`AbortController`) since
+ * this is the one genuinely slow/unreliable network call in this plugin.
+ */
+export async function callLlm(settings: LlmSettings, prompt: string): Promise<CallLlmResult> {
+  const languageModel = resolveModel(settings);
   const { generateText } = loadOptional<typeof import("ai")>("ai");
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), (settings.llmTimeoutSeconds ?? 30) * 1000);
+  const timer = setTimeout(() => controller.abort(), (settings.llmTimeoutSeconds ?? 60) * 1000);
   try {
-    const { text } = await generateText({ model, prompt, abortSignal: controller.signal });
-    return text;
+    const { text, response, usage } = await generateText({ model: languageModel, prompt, abortSignal: controller.signal });
+    return {
+      text,
+      model: response.modelId,
+      usage: { promptTokens: usage.inputTokens, completionTokens: usage.outputTokens, totalTokens: usage.totalTokens },
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -185,15 +205,19 @@ export async function callLlm(settings: LlmSettings, prompt: string): Promise<st
 /**
  * Strips everything outside the first `<svg`...last `</svg>` span - a chat model asked for "only raw
  * SVG markup" still often wraps it in a markdown code fence or adds a sentence of commentary either
- * side, despite the target-guidance fragment telling it not to.
+ * side, despite the target-guidance fragment telling it not to. Also swaps any `&nbsp;` for the literal
+ * U+00A0 character it means - `&nbsp;` isn't one of XML's five predefined entities (only
+ * `&amp;`/`&lt;`/`&gt;`/`&apos;`/`&quot;` are), so a model used to writing HTML emits it anyway, and the
+ * core plugin's `@xmldom/xmldom` DOMParser then fails to parse the document at all over one undefined
+ * entity reference. The raw character needs no entity encoding, so this sidesteps the problem entirely.
  */
 export function extractSvg(raw: string): string {
   const start = raw.indexOf("<svg");
   const end = raw.lastIndexOf("</svg>");
   if (start === -1 || end === -1 || end < start) {
-    throw new Error('LLM response did not contain a "<svg>...</svg>" document');
+    throw new Error(`LLM response did not contain a "<svg>...</svg>" document - first 512 chars: ${raw.slice(0, 512)}`);
   }
-  return raw.slice(start, end + "</svg>".length);
+  return raw.slice(start, end + "</svg>".length).replace(/&nbsp;/gi, " ");
 }
 
 // Re-exported so callers only need one import for the whole gateway surface.

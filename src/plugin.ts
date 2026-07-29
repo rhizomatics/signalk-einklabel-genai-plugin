@@ -1,7 +1,7 @@
 import { Plugin, ServerAPI } from "@signalk/server-api";
 import esl from "@rhizomatics/signalk-einklabel-plugin";
 import { defaultConfig, PluginConfig } from "./config";
-import { availableProviders, callLlm } from "./llmGateway";
+import { availableProviders, callLlm, isOpenRouterProvider } from "./llmGateway";
 import { withRetries } from "./retry";
 import { createTemplateProvider } from "./templateProvider";
 
@@ -18,8 +18,11 @@ const TEST_PROMPT = 'Reply with exactly the word "OK", nothing else.';
 async function runConnectionTest(app: ServerAPI, config: PluginConfig): Promise<void> {
   const label = `${config.llmProvider ?? "openrouter"}/${config.llmModel ?? "(no model configured)"}`;
   try {
-    const reply = await withRetries(config.llmRetries, () => callLlm(config, TEST_PROMPT));
-    app.setPluginStatus(`LLM test OK (${label}): ${reply.trim().slice(0, 200)}`);
+    const { text, model, usage } = await withRetries(config.llmRetries, () => callLlm(config, TEST_PROMPT));
+    if (isOpenRouterProvider(config.llmProvider)) {
+      app.debug(`openrouter model=${model ?? "unknown"} usage=${JSON.stringify(usage)}`);
+    }
+    app.setPluginStatus(`LLM test OK (${label}): ${text.trim().slice(0, 200)}`);
   } catch (err) {
     app.setPluginError(`LLM test failed (${label}): ${(err as Error).message}`);
   } finally {
@@ -36,7 +39,7 @@ export function createPlugin(app: ServerAPI): Plugin {
   // know or care that anything changed on this side.
   let currentConfig: PluginConfig = defaultConfig();
 
-  esl.registerTemplateProvider(createTemplateProvider(() => currentConfig));
+  esl.registerTemplateProvider(createTemplateProvider(app, () => currentConfig));
 
   return {
     id: "signalk-einklabel-genai-plugin",
@@ -66,10 +69,7 @@ export function createPlugin(app: ServerAPI): Plugin {
           type: "string",
           title: "LLM model",
           description:
-            'Provider-specific model id/name, e.g. "gpt-4o", "claude-sonnet-4-5", "gemini-2.5-flash", "grok-4", or an Ollama/local model tag. ' +
-            'Left blank with "LLM provider" set to "openrouter", defaults to "openrouter/free" - OpenRouter\'s free-tier routing alias, picking ' +
-            "a random free model each call, no paid account needed.",
-          default: "openrouter/free",
+            'Provider-specific model id/name, e.g. "gpt-4o", "claude-sonnet-4-5", "gemini-2.5-flash", "grok-4", or an Ollama/local model tag.',
         },
         llmBaseUrl: {
           type: "string",

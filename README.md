@@ -10,7 +10,11 @@ By default it uses [OpenRouter](https://openrouter.ai), however it can use any o
 
 This plugin comes with a marine weather forecast example prompt. When installed, and SignalK server restarted, you should see this appear as a template to choose in the main eInk Label plugin.
 
-If you don't already have an AI account, get a [free API key from OpenRouter](https://openrouter.ai/openrouter/free) - leave the model as `openrouter/free`, OpenRouter's free-tier routing alias, although note you will get a random model every time it is called.
+### Testing on your server
+
+If you don't already have an AI account, get a [free API key from OpenRouter](https://openrouter.ai/openrouter/free) - set the _model_ to one of the [specific free models](https://openrouter.ai/openrouter/free), or `openrouter/free`, OpenRouter's free-tier routing alias, although note you will get a random model every time it is called, some of which are specialized (e.g. "content safety") and will not generate an image. Free models may not lookup web pages or APIs, so guess things like weather, and the image quality will likely be much poorer than using a mainstream LLM.
+
+Use the `esl-cli` CLI to see generated prompts or create test PNGs.
 
 ### Customizing Prompts
 
@@ -63,7 +67,7 @@ Combined with a distilled model, for example Llama 3.2 3B, Phi-4 Mini 3.8B, or Q
 
 - `llmProvider` - `openai`, `anthropic`, `google`, `xai`, `deepseek`, `moonshotai`, `openrouter`, `ollama`, or `local` (any other OpenAI-compatible server). The config screen's dropdown only lists providers whose package is actually installed (`openrouter` always is) - install another one's optional package and reopen the page to add it.
 - `llmApiKey` - not needed for `ollama`/`local` unless your server itself checks one
-- `llmModel` - provider-specific model id, e.g. `gpt-4o`, `claude-sonnet-4-5`, `gemini-2.5-flash`, `grok-4`, or an Ollama/local model tag. Left blank with `llmProvider` set to `openrouter`, defaults to `openrouter/free`
+- `llmModel` - provider-specific model id, e.g. `gpt-4o`, `claude-sonnet-4-5`, `gemini-2.5-flash`, `grok-4`, or an Ollama/local model tag
 - `llmBaseUrl` - required for `local`; optional for `ollama` (defaults to `http://localhost:11434/v1`)
 - `llmTimeoutSeconds`/`llmRetries` - how long to wait, and how many attempts, before giving up (the core plugin then shows its fallback warning)
 - `promptsDir` - where to look for your own `.md` prompt files, same convention as the core plugin's `templatesDir` (empty for the default, a relative path resolves against `~/.signalk`, absolute used as-is)

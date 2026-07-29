@@ -26,7 +26,7 @@ import { join } from "path";
 import type { Command } from "commander";
 import esl, { Colour, TemplateContext } from "@rhizomatics/signalk-einklabel-plugin";
 import { BUNDLED_PROMPTS_DIR, DEFAULT_PROMPT_NAME, resolvePromptPath, resolvePromptsDir } from "./config";
-import { callLlm, extractSvg, LlmSettings } from "./llmGateway";
+import { callLlm, extractSvg, isOpenRouterProvider, LlmSettings } from "./llmGateway";
 import { withRetries } from "./retry";
 
 /** Matches the core plugin's own (not publicly re-exported) `Binding` shape structurally - see `esl.findBindingsInText`'s return type. */
@@ -149,7 +149,7 @@ addPromptOptions(
     "--llm-base-url <url>",
     'OpenAI-compatible endpoint - required if --llm-provider is "local"; for "ollama" defaults to http://localhost:11434/v1',
   )
-  .option("--llm-timeout <seconds>", "LLM call timeout", "30")
+  .option("--llm-timeout <seconds>", "LLM call timeout", "60")
   .option("--llm-retries <n>", "LLM call attempts before giving up", "2")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .action(async (name: string | undefined, opts: any) => {
@@ -161,8 +161,17 @@ addPromptOptions(
       llmBaseUrl: opts.llmBaseUrl,
       llmTimeoutSeconds: Number(opts.llmTimeout),
     };
-    const raw = await withRetries(Number(opts.llmRetries), () => callLlm(llmSettings, prompt));
-    const svg = extractSvg(raw);
+    const {
+      text: svg,
+      model,
+      usage,
+    } = await withRetries(Number(opts.llmRetries), async () => {
+      const result = await callLlm(llmSettings, prompt);
+      return { ...result, text: extractSvg(result.text) };
+    });
+    if (isOpenRouterProvider(llmSettings.llmProvider)) {
+      console.log(`openrouter model=${model ?? "unknown"} usage=${JSON.stringify(usage)}`);
+    }
     const svgPath = opts.saveSvg ?? join(tmpdir(), `esl-cli-generate-${Date.now()}.svg`);
     await writeFile(svgPath, svg);
 
