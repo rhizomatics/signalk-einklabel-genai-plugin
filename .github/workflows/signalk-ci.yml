@@ -12,6 +12,7 @@ jobs:
     with:
       coverage-command: npm run coverage
       format-check-command: npm run fmt:check
+      enable-armv7: false
 
   # Separate from the `test` matrix above (which only persists coverage/ as a
   # short-lived build artifact) - uploads the same lcov report to Codecov so the

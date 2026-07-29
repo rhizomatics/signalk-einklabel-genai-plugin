@@ -21,11 +21,11 @@ test("createTemplateProvider", async (t) => {
     assert.equal(provider.suffix, SUFFIX);
   });
 
-  await t.test("listTemplates offers the bundled default prompt, suffixed", () => {
+  await t.test("listTemplates offers the bundled default prompt, suffixed, with its .md extension hidden", () => {
     withTempDir((promptsDir) => {
       const config: PluginConfig = { llmTimeoutSeconds: 30, llmRetries: 2, promptsDir };
       const provider = createTemplateProvider(() => config);
-      assert.ok(provider.listTemplates().includes(`${DEFAULT_PROMPT_NAME} ${SUFFIX}`));
+      assert.ok(provider.listTemplates().includes(`${DEFAULT_PROMPT_NAME.replace(/\.md$/, "")} ${SUFFIX}`));
     });
   });
 
@@ -33,7 +33,7 @@ test("createTemplateProvider", async (t) => {
     withTempDir((promptsDir) => {
       const config: PluginConfig = { llmTimeoutSeconds: 30, llmRetries: 2, promptsDir };
       const provider = createTemplateProvider(() => config);
-      const templateName = `${DEFAULT_PROMPT_NAME} ${SUFFIX}`;
+      const templateName = `${DEFAULT_PROMPT_NAME.replace(/\.md$/, "")} ${SUFFIX}`;
       const bindings = provider.describeBindings(templateName);
       // The bundled forecast.md references design.length.overall/design.aisShipType.name/navigation.position -
       // this just confirms the file actually got read and parsed as bindings, not the exact set.

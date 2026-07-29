@@ -1,3 +1,4 @@
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { PluginConfig } from "./config";
 import { getLlmProvider, LlmSettings as RegistryLlmSettings } from "./llmProviderRegistry";
 
@@ -7,15 +8,15 @@ import { getLlmProvider, LlmSettings as RegistryLlmSettings } from "./llmProvide
 export type LlmSettings = RegistryLlmSettings & { llmTimeoutSeconds?: number };
 
 /**
- * `ai` and every `@ai-sdk/*`/`ai-sdk-ollama` provider package are `optionalDependencies` (see
- * package.json), not plain `dependencies` - a user picks exactly one provider, so there's no reason to
- * force every one of them to install, and an install that fails to fetch one it doesn't even use (a
- * network hiccup, `npm install --omit=optional`, an unsupported platform) must not break this plugin
- * for everyone else. That means every reference to one of these packages has to be a `require()` reached
- * only when `callLlm` actually needs it - a top-level `import` would be resolved eagerly the moment this
- * module loads, throwing before any config is even read. Types are still fully checked via
- * `typeof import(...)` at each call site, which - unlike a value `import` - is erased entirely at
- * compile time and leaves no runtime trace for `tsc` to eagerly require.
+ * `ai` and every `@ai-sdk/*`/`ai-sdk-ollama` provider package (other than `@openrouter/ai-sdk-provider`,
+ * see below) are `optionalDependencies` (see package.json), not plain `dependencies` - a user picks
+ * exactly one provider, so there's no reason to force every one of them to install, and an install that
+ * fails to fetch one it doesn't even use (a network hiccup, `npm install --omit=optional`, an unsupported
+ * platform) must not break this plugin for everyone else. That means every reference to one of these
+ * packages has to be a `require()` reached only when `callLlm` actually needs it - a top-level `import`
+ * would be resolved eagerly the moment this module loads, throwing before any config is even read. Types
+ * are still fully checked via `typeof import(...)` at each call site, which - unlike a value `import` -
+ * is erased entirely at compile time and leaves no runtime trace for `tsc` to eagerly require.
  */
 export function loadOptional<M>(moduleName: string): M {
   try {
@@ -51,7 +52,7 @@ function resolveModel(settings: LlmSettings): any {
   if (!model) {
     throw new Error("no LLM model configured (llmModel)");
   }
-  const provider = settings.llmProvider ?? "openai";
+  const provider = settings.llmProvider ?? "openrouter";
 
   const registered = getLlmProvider(provider);
   if (registered) return registered(settings);
@@ -76,6 +77,9 @@ function resolveModel(settings: LlmSettings): any {
     case "moonshotai": {
       const { createMoonshotAI } = loadOptional<typeof import("@ai-sdk/moonshotai")>("@ai-sdk/moonshotai");
       return createMoonshotAI({ apiKey: settings.llmApiKey })(model);
+    }
+    case "openrouter": {
+      return createOpenRouter({ apiKey: settings.llmApiKey })(model);
     }
     case "ollama": {
       const { createOllama } = loadOptional<typeof import("ai-sdk-ollama")>("ai-sdk-ollama");

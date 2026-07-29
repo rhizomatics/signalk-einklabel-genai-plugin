@@ -7,9 +7,11 @@ export interface PluginConfig {
    * Which LLM gateway a prompt is sent to - see `./llmGateway.ts`. `"ollama"`/`"local"` both go through
    * the generic OpenAI-compatible provider; any other value not in this list is looked up in the
    * `registerLlmProvider` registry (`./llmProviderRegistry.ts`) before giving up - so someone keen can
-   * add support for another provider entirely without forking this plugin. Defaults to `"openai"`.
+   * add support for another provider entirely without forking this plugin. Defaults to `"openrouter"`,
+   * the only provider bundled as a regular `dependency` rather than an `optionalDependency` - see
+   * `./llmGateway.ts`'s top doc comment.
    */
-  llmProvider?: "openai" | "anthropic" | "google" | "xai" | "deepseek" | "moonshotai" | "ollama" | "local";
+  llmProvider?: "openrouter" | "openai" | "anthropic" | "google" | "xai" | "deepseek" | "moonshotai" | "ollama" | "local";
   /** Ignored for `llmProvider: "ollama"`/`"local"` unless the server itself requires one. */
   llmApiKey?: string;
   /** Provider-specific model id, e.g. `"gpt-4o"`, `"claude-sonnet-4-5"`, `"gemini-2.5-flash"`, or an Ollama/local model tag. */

@@ -1,3 +1,10 @@
+# [1.0.1]
+
+- Packaging fixes
+- Simplified adding GenAI support to `esl-cli`
+- Added `openrouter` as the default built-in AI provider
+  - Other providers are available by `npm install`
+
 # [1.0.0]
 
 - Initial release with support for major cloud GenAI services and local LLMs

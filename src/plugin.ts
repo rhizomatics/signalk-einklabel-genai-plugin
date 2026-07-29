@@ -23,11 +23,12 @@ export function createPlugin(app: ServerAPI): Plugin {
           type: "string",
           title: "LLM provider",
           description:
-            "Which LLM gateway to call - each (other than local/ollama) needs its own optional npm package installed, e.g. " +
-            '`npm install ai @ai-sdk/anthropic` (see README). "Ollama" defaults to a local Ollama server with no further ' +
-            'config; "Local" is any other OpenAI-compatible endpoint (e.g. LM Studio) and needs "LLM base URL" below.',
-          enum: ["openai", "anthropic", "google", "xai", "deepseek", "moonshotai", "ollama", "local"],
-          default: "openai",
+            'Which LLM gateway to call - "OpenRouter" is bundled and needs no extra install; every other option ' +
+            "(other than local/ollama) needs its own optional npm package installed, e.g. `npm install ai @ai-sdk/anthropic` " +
+            '(see README). "Ollama" defaults to a local Ollama server with no further config; "Local" is any other ' +
+            'OpenAI-compatible endpoint (e.g. LM Studio) and needs "LLM base URL" below.',
+          enum: ["openrouter", "openai", "anthropic", "google", "xai", "deepseek", "moonshotai", "ollama", "local"],
+          default: "openrouter",
         },
         llmApiKey: {
           type: "string",
@@ -76,7 +77,7 @@ export function createPlugin(app: ServerAPI): Plugin {
     uiSchema: () => ({ llmApiKey: { "ui:widget": "password" } }),
     start(config: object) {
       currentConfig = { ...defaultConfig(), ...(config as Partial<PluginConfig>) };
-      app.debug(`eInk Label GenAI plugin started (llmProvider=${currentConfig.llmProvider ?? "openai"})`);
+      app.debug(`eInk Label GenAI plugin started (llmProvider=${currentConfig.llmProvider ?? "openrouter"})`);
     },
     stop() {},
   };

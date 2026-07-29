@@ -10,9 +10,9 @@ export const SUFFIX = "(GenAI)";
 
 const GUIDANCE_NAME = join(".assets", "target_guidance.md");
 
-/** Strips ` (GenAI)` back off a dropdown entry to get the bare prompt file name, e.g. `"forecast (GenAI)"` -> `"forecast.md"`. */
+/** Strips ` (GenAI)` back off a dropdown entry and restores the `.md` extension hidden from it, e.g. `"forecast (GenAI)"` -> `"forecast.md"`. */
 function promptNameFor(templateName: string): string {
-  return templateName.slice(0, templateName.length - ` ${SUFFIX}`.length);
+  return `${templateName.slice(0, templateName.length - ` ${SUFFIX}`.length)}.md`;
 }
 
 /**
@@ -38,7 +38,7 @@ export function createTemplateProvider(getConfig: () => PluginConfig): esl.Templ
     suffix: SUFFIX,
 
     listTemplates(): string[] {
-      return promptNameOptions(promptsDir()).map((name) => `${name} ${SUFFIX}`);
+      return promptNameOptions(promptsDir()).map((name) => `${name.replace(/\.md$/, "")} ${SUFFIX}`);
     },
 
     describeBindings(templateName) {

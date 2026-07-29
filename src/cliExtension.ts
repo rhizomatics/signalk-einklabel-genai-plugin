@@ -1,9 +1,16 @@
 /**
  * Contributes `prompt`/`generate` subcommands to the core plugin's `esl-cli`, for testing prompts
- * without a device or a live SignalK server. Load via `esl-cli -r <path-to-this-file's-dist> prompt ...`
- * - the core CLI pre-scans `-r`/`--require` and loads those modules *before* building its own command
- * tree (see its own README/source for why), which is what makes adding a brand-new subcommand from here
- * possible at all, unlike a module that only registers a vendor driver/template provider.
+ * without a device or a live SignalK server. Load via `esl-cli -r @rhizomatics/signalk-einklabel-genai-plugin/cli prompt ...`
+ * (the `./cli` subpath export in package.json, so callers don't need to know this compiles to
+ * `dist/cliExtension.js`) - the core CLI pre-scans `-r`/`--require` and loads those modules *before*
+ * building its own command tree (see its own README/source for why), which is what makes adding a
+ * brand-new subcommand from here possible at all, unlike a module that only registers a vendor
+ * driver/template provider.
+ *
+ * Deliberately NOT loaded from this package's main entry (`./index.ts`, what SignalK server actually
+ * requires to load the plugin) - the core CLI module this file requires below calls
+ * `program.parseAsync(process.argv)` at the top level as a side effect of being required, which is
+ * correct for a CLI invocation but would misfire if pulled into a running SignalK server process.
  *
  * A plain top-level `require()` (rather than a static `import`) of the core CLI module is deliberate -
  * it makes the load-time side effect (adding commands to an already-running CLI process) obvious to a
@@ -132,7 +139,7 @@ addPromptOptions(
     "--save-svg <path>",
     "also write the LLM's raw SVG response to this path (feed it straight into the core plugin's `paint -t`/`render -t` afterwards)",
   )
-  .option("--llm-provider <name>", "openai, anthropic, google, xai, deepseek, moonshotai, ollama, or local", "openai")
+  .option("--llm-provider <name>", "openrouter, openai, anthropic, google, xai, deepseek, moonshotai, ollama, or local", "openrouter")
   .option("--llm-api-key <key>", "LLM API key - falls back to the provider's usual environment variable if omitted")
   .requiredOption(
     "--llm-model <name>",

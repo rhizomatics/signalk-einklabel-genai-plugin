@@ -18,7 +18,8 @@ const providers = new Map<string, LlmProviderFactory>();
  * Public extension point mirroring the core `signalk-einklabel-plugin`'s own `registerVendorDriver`/
  * `registerTemplateProvider` pattern, one level down: this plugin already bundles support for several
  * providers (`./llmGateway.ts`'s built-in switch: openai/anthropic/google/xai/deepseek/moonshotai/
- * ollama/local) as `optionalDependencies`, but someone wanting a provider not in that list (a bespoke
+ * ollama/local as `optionalDependencies`, plus openrouter as a regular `dependency`), but someone
+ * wanting a provider not in that list (a bespoke
  * wrapper, a provider with no official `@ai-sdk/*` package yet) can register one of their own without
  * forking this plugin - `resolveModel` in `./llmGateway.ts` checks this registry first, by `llmProvider`
  * name, before falling through to the built-in switch. Call this from your own SignalK plugin's
