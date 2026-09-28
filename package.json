@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@signalk/server-api": "^2.28.0",
-    "@types/node": "^20.14.0",
+    "@types/node": "^26.6.2",
     "commander": "^15.0.0",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
