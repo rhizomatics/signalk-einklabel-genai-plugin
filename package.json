@@ -72,7 +72,7 @@
     "@ai-sdk/moonshotai": "^3.0.17",
     "@ai-sdk/openai": "^4.0.20",
     "@ai-sdk/openai-compatible": "^3.0.14",
-    "@ai-sdk/xai": "^4.0.18",
+    "@ai-sdk/xai": "^5.0.4",
     "ai-sdk-ollama": "^4.1.0"
   },
   "engines": {
