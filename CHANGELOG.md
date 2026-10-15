@@ -1,3 +1,7 @@
+# [0.4.0]
+
+- New `describeContent` API implemented to support debug use
+
 # [0.3.0]
 
 - Update timeout to 60 seconds to handle slower local or free models

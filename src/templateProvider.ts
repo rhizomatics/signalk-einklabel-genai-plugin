@@ -35,6 +35,14 @@ export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginCo
     };
   }
 
+  /** Shared by `render` (sent to the LLM) and `describeContent` (written to the core plugin's debug log before each render, in place of the `<desc>` bindings a GenAI prompt has none of) - the prompt+guidance text with every `{...}` placeholder substituted against `context`. */
+  function buildPrompt(templateName: string, context: esl.TemplateRenderRequest["context"]): string {
+    const { promptPath, guidancePath } = promptPathFor(templateName);
+    const promptText = readFileSync(promptPath, "utf-8");
+    const guidanceText = readFileSync(guidancePath, "utf-8");
+    return `${esl.substituteBindingsInText(promptText, context).trim()}\n\n${esl.substituteBindingsInText(guidanceText, context).trim()}\n`;
+  }
+
   return {
     suffix: SUFFIX,
 
@@ -49,13 +57,12 @@ export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginCo
       return esl.findBindingsInText(promptText, guidanceText);
     },
 
+    describeContent(request) {
+      return buildPrompt(request.templateName, request.context);
+    },
+
     async render(request) {
-      const { promptPath, guidancePath } = promptPathFor(request.templateName);
-      const promptText = readFileSync(promptPath, "utf-8");
-      const guidanceText = readFileSync(guidancePath, "utf-8");
-      const prompt = `${esl.substituteBindingsInText(promptText, request.context).trim()}\n\n${esl
-        .substituteBindingsInText(guidanceText, request.context)
-        .trim()}\n`;
+      const prompt = buildPrompt(request.templateName, request.context);
 
       const config = getConfig();
       const llmSettings: LlmSettings = {

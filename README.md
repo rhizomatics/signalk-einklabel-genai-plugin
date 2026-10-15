@@ -1,5 +1,7 @@
 # eInk Label GenAI Templates
 
+[![boat tech directory](https://boat-tech-directory.rhizomatics.org.uk/images/badge.svg)](https://boat-tech-directory.rhizomatics.org.uk)
+
 A companion plugin for [`@rhizomatics/signalk-einklabel-plugin`](https://github.com/rhizomatics/signalk-einklabel-plugin) that generates an image to paint on shelf label entirely from an LLM prompt, as an alternative to a hand-authored SVG template.
 
 By default it uses [OpenRouter](https://openrouter.ai), however it can use any of the [Vercel AI SDK providers](https://ai-sdk.dev/providers/ai-sdk-providers) directly, including local LLMs like Ollama.
