@@ -1,4 +1,4 @@
-# [0.4.0]
+# [0.3.1]
 
 - New `describeContent` API implemented to support debug use
 

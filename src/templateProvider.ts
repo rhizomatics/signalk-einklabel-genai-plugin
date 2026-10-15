@@ -22,7 +22,16 @@ function promptNameFor(templateName: string): string {
  * current `promptsDir` fresh each time, rather than once at startup, so adding/editing a `.md` prompt
  * file takes effect without a plugin restart - same as the core plugin's own template directory.
  */
-export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginConfig): esl.TemplateProvider {
+/**
+ * `esl.TemplateProvider` plus `describeContent` - not (yet) part of the core interface, so declared here.
+ * Useful for debugging what the LLM is sent, and a future core feature (e.g. emailing a label) could
+ * pick it up; until then core simply never calls it.
+ */
+export type GenAiTemplateProvider = esl.TemplateProvider & {
+  describeContent(request: esl.TemplateRenderRequest): string;
+};
+
+export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginConfig): GenAiTemplateProvider {
   function promptsDir(): string {
     return resolvePromptsDir(getConfig().promptsDir);
   }
@@ -35,7 +44,7 @@ export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginCo
     };
   }
 
-  /** Shared by `render` (sent to the LLM) and `describeContent` (written to the core plugin's debug log before each render, in place of the `<desc>` bindings a GenAI prompt has none of) - the prompt+guidance text with every `{...}` placeholder substituted against `context`. */
+  /** Shared by `render` (sent to the LLM) and `describeContent` (for debugging what the LLM is sent) - the prompt+guidance text with every `{...}` placeholder substituted against `context`. */
   function buildPrompt(templateName: string, context: esl.TemplateRenderRequest["context"]): string {
     const { promptPath, guidancePath } = promptPathFor(templateName);
     const promptText = readFileSync(promptPath, "utf-8");

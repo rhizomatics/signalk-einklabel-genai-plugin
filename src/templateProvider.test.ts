@@ -46,20 +46,17 @@ test("createTemplateProvider", async (t) => {
     });
   });
 
-  await t.test(
-    "describeContent returns the prompt+guidance text with every {...} placeholder substituted, for the core plugin's debug log",
-    () => {
-      withTempDir((promptsDir) => {
-        const config: PluginConfig = { llmTimeoutSeconds: 30, llmRetries: 2, promptsDir };
-        const provider = createTemplateProvider(fakeApp, () => config);
-        const templateName = `${DEFAULT_PROMPT_NAME.replace(/\.md$/, "")} ${SUFFIX}`;
-        // No SignalK data populated - every binding falls through to substituteTextBindings' "???"
-        // fallback, which is enough to confirm every placeholder was processed (none left literally).
-        const context = { signalk: { self: {} } };
-        const content = provider.describeContent!({ templateName, context, width: 416, height: 240, colours: ["black", "white"] });
-        assert.ok(content.length > 0);
-        assert.ok(!content.includes("{"), "every {...} placeholder should have been substituted");
-      });
-    },
-  );
+  await t.test("describeContent returns the prompt+guidance text with every {...} placeholder substituted", () => {
+    withTempDir((promptsDir) => {
+      const config: PluginConfig = { llmTimeoutSeconds: 30, llmRetries: 2, promptsDir };
+      const provider = createTemplateProvider(fakeApp, () => config);
+      const templateName = `${DEFAULT_PROMPT_NAME.replace(/\.md$/, "")} ${SUFFIX}`;
+      // No SignalK data populated - every binding falls through to substituteTextBindings' "???"
+      // fallback, which is enough to confirm every placeholder was processed (none left literally).
+      const context = { signalk: { self: {} } };
+      const content = provider.describeContent({ templateName, context, width: 416, height: 240, colours: ["black", "white"] });
+      assert.ok(content.length > 0);
+      assert.ok(!content.includes("{"), "every {...} placeholder should have been substituted");
+    });
+  });
 });
