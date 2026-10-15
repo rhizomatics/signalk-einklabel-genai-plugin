@@ -23,9 +23,10 @@ function promptNameFor(templateName: string): string {
  * file takes effect without a plugin restart - same as the core plugin's own template directory.
  */
 /**
- * `esl.TemplateProvider` plus `describeContent` - not (yet) part of the core interface, so declared here.
- * Useful for debugging what the LLM is sent, and a future core feature (e.g. emailing a label) could
- * pick it up; until then core simply never calls it.
+ * `esl.TemplateProvider` with its optional `describeContent` made required, so callers (and tests) can
+ * use it without a guard. Core logs it to debug output before each `render()`, so you can see what the
+ * LLM is sent; a future core feature (e.g. emailing a label) could reuse it too. Older core versions
+ * without `describeContent` simply never call it.
  */
 export type GenAiTemplateProvider = esl.TemplateProvider & {
   describeContent(request: esl.TemplateRenderRequest): string;
