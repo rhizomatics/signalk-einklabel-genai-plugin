@@ -1,6 +1,6 @@
 # eInk Label GenAI Templates
 
-[![boat tech directory](https://boat-tech-directory.rhizomatics.org.uk/images/badge.svg)](https://boat-tech-directory.rhizomatics.org.uk)
+[![boat tech directory](https://boat-tech-directory.rhizomatics.org.uk/images/badge.svg)](https://boat-tech-directory.rhizomatics.org.uk) [![managed by hq](https://raw.githubusercontent.com/rhizomatics/hq/main/assets/badge-managed-by-hq.svg)](https://github.com/rhizomatics/hq)
 
 A companion plugin for [`@rhizomatics/signalk-einklabel-plugin`](https://github.com/rhizomatics/signalk-einklabel-plugin) that generates an image to paint on shelf label entirely from an LLM prompt, as an alternative to a hand-authored SVG template.
 
