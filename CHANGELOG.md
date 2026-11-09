@@ -1,3 +1,8 @@
+# [0.3.2]
+
+- `@rhizomatics/signalk-einklabel-plugin` is no longer an npm `dependency`, only `signalk.requires` (and a `devDependency` for types/tests) - the App Store installs it flat in `~/.signalk/node_modules`, so the plugin always registers with the one running copy rather than a possible nested duplicate
+- Extension docs updated to match: provider packages should declare this plugin the same way
+
 # [0.3.1]
 
 - New `describeContent` API implemented to support debug use

@@ -129,4 +129,4 @@ import genai from "@rhizomatics/signalk-einklabel-genai-plugin";
 genai.registerLlmProvider("my-provider", (settings) => myOwnModelFactory(settings));
 ```
 
-Declare this package as a regular npm `dependency` (**not** a `peerDependency` - see the core plugin's own README for why) plus `"signalk": { "requires": ["@rhizomatics/signalk-einklabel-genai-plugin"] }` in your extension's `package.json`.
+Don't list this package in your extension's `dependencies` (or `peerDependencies`) - declare it via `"signalk": { "requires": ["@rhizomatics/signalk-einklabel-genai-plugin"] }` in your extension's `package.json` instead, and add it as a `devDependency` for types and tests. The App Store installs required plugins flat in `~/.signalk/node_modules`, so your `require` still resolves at runtime, to the same copy the running plugin uses - see the core plugin's [Extending](https://github.com/rhizomatics/signalk-einklabel-plugin/blob/main/docs/extending.md) docs for why.

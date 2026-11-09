@@ -24,9 +24,10 @@ const providers = new Map<string, LlmProviderFactory>();
  * forking this plugin - `resolveModel` in `./llmGateway.ts` checks this registry first, by `llmProvider`
  * name, before falling through to the built-in switch. Call this from your own SignalK plugin's
  * `start()` (or `esl-cli --require <module>`, loaded before parsing per the core plugin's own CLI
- * extension timing - see its README). Declare this package as a regular npm `dependency` (not a
- * `peerDependency` - see the core plugin's own `registerVendorDriver` doc comment for why) so npm
- * resolves a real copy to register into.
+ * extension timing - see its README). Declare this package via `"signalk": { "requires": [...] }` plus
+ * a `devDependency` for types/tests - not a regular `dependency` or `peerDependency`, so `require`
+ * resolves the one copy the App Store installed (see the core plugin's own `registerVendorDriver`
+ * doc comment for why).
  */
 export function registerLlmProvider(name: string, factory: LlmProviderFactory): void {
   providers.set(name, factory);

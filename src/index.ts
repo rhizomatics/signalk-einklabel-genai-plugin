@@ -17,8 +17,8 @@ namespace plugin {
    * Public extension point for a package adding support for an LLM provider this plugin doesn't
    * already bundle - see `registerLlmProvider`'s own doc comment (`./llmProviderRegistry.ts`) for the
    * full contract, and the core plugin's own `registerVendorDriver` doc comment for the dependency
-   * convention to follow (a regular npm `dependency` plus `"signalk": { "requires": [...] }`, **not** a
-   * `peerDependency`).
+   * convention to follow (`"signalk": { "requires": [...] }` plus a `devDependency` for types/tests,
+   * **not** a regular `dependency` or `peerDependency`).
    */
   export const registerLlmProvider = registerLlmProviderImpl;
   export const getLlmProvider = getLlmProviderImpl;
