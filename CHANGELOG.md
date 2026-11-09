@@ -1,5 +1,7 @@
 # [0.3.2]
 
+- Fix: a disabled plugin no longer calls the LLM. Repaints of `(GenAI)` templates now fail fast with "not running" (core shows its fallback warning) instead of making paid LLM calls with the last config, or failing with a misleading "no LLM model configured" after a restart. Templates stay listed, so saved device choices are kept (#28)
+- Fix: parallel renders of the same template to several labels no longer share one cached SVG file, which could paint one label with another's content at the wrong size (#28)
 - `@rhizomatics/signalk-einklabel-plugin` is no longer an npm `dependency`, only `signalk.requires` (and a `devDependency` for types/tests) - the App Store installs it flat in `~/.signalk/node_modules`, so the plugin always registers with the one running copy rather than a possible nested duplicate
 - Extension docs updated to match: provider packages should declare this plugin the same way
 
