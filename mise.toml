@@ -4,4 +4,6 @@ minimum_release_age = "7d"
 
 [tools]
 prek = "latest"
-node = "22"
+node = "lts"
+oxfmt = "latest"
+oxlint = "latest"
