@@ -59,4 +59,14 @@ test("createTemplateProvider", async (t) => {
       assert.ok(!content.includes("{"), "every {...} placeholder should have been substituted");
     });
   });
+
+  await t.test("render rejects without calling the LLM while the plugin isn't running", async () => {
+    const provider = createTemplateProvider(fakeApp, () => undefined);
+    const templateName = `${DEFAULT_PROMPT_NAME.replace(/\.md$/, "")} ${SUFFIX}`;
+    assert.ok(provider.listTemplates().includes(templateName), "templates stay listed so saved device configs keep their choice");
+    await assert.rejects(
+      provider.render({ templateName, context: { signalk: { self: {} } }, width: 416, height: 240, colours: ["black", "white"] }),
+      /not running/,
+    );
+  });
 });

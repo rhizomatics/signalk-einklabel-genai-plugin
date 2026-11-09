@@ -1,9 +1,10 @@
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { randomUUID } from "crypto";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { ServerAPI } from "@signalk/server-api";
 import esl from "@rhizomatics/signalk-einklabel-plugin";
 import { withRetries } from "./retry";
-import { PluginConfig, promptNameOptions, resolvePromptPath, resolvePromptsDir } from "./config";
+import { defaultConfig, PluginConfig, promptNameOptions, resolvePromptPath, resolvePromptsDir } from "./config";
 import { callLlm, extractSvg, isOpenRouterProvider, LlmSettings } from "./llmGateway";
 
 /** Appended to every prompt name this plugin offers in the core plugin's "Template" dropdown. */
@@ -18,7 +19,7 @@ function promptNameFor(templateName: string): string {
 
 /**
  * The `esl.TemplateProvider` this plugin registers with the core plugin (`esl.registerTemplateProvider`,
- * called from `./plugin.ts`'s `start()`). `listTemplates`/`describeBindings`/`render` all resolve the
+ * called when `./plugin.ts`'s `createPlugin` constructs the plugin, whether or not it is enabled). `listTemplates`/`describeBindings`/`render` all resolve the
  * current `promptsDir` fresh each time, rather than once at startup, so adding/editing a `.md` prompt
  * file takes effect without a plugin restart - same as the core plugin's own template directory.
  */
@@ -32,9 +33,10 @@ export type GenAiTemplateProvider = esl.TemplateProvider & {
   describeContent(request: esl.TemplateRenderRequest): string;
 };
 
-export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginConfig): GenAiTemplateProvider {
+/** `getConfig` returns `undefined` while the plugin isn't running: templates are still listed, but `render()` rejects without calling the LLM. */
+export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginConfig | undefined): GenAiTemplateProvider {
   function promptsDir(): string {
-    return resolvePromptsDir(getConfig().promptsDir);
+    return resolvePromptsDir((getConfig() ?? defaultConfig()).promptsDir);
   }
 
   function promptPathFor(templateName: string): { promptPath: string; guidancePath: string } {
@@ -72,9 +74,12 @@ export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginCo
     },
 
     async render(request) {
+      const config = getConfig();
+      if (!config) {
+        throw new Error('signalk-einklabel-genai-plugin is not running - enable it to render "(GenAI)" templates');
+      }
       const prompt = buildPrompt(request.templateName, request.context);
 
-      const config = getConfig();
       const llmSettings: LlmSettings = {
         llmProvider: config.llmProvider,
         llmApiKey: config.llmApiKey,
@@ -103,9 +108,15 @@ export function createTemplateProvider(app: ServerAPI, getConfig: () => PluginCo
       // reused unchanged, rather than needing its own copy of that logic.
       const cacheDir = join(promptsDir(), ".genai-cache");
       mkdirSync(cacheDir, { recursive: true });
-      const cachePath = join(cacheDir, `${Buffer.from(request.templateName).toString("hex")}.svg`);
+      // One file per render: core repaints a device's targets in parallel, so a name shared by every
+      // render of the same template could be overwritten by another target's SVG before it is read.
+      const cachePath = join(cacheDir, `${Buffer.from(request.templateName).toString("hex")}-${randomUUID()}.svg`);
       writeFileSync(cachePath, svg);
-      return renderer.render(cachePath, request.context, request.width, request.height);
+      try {
+        return await renderer.render(cachePath, request.context, request.width, request.height);
+      } finally {
+        rmSync(cachePath, { force: true });
+      }
     },
   };
 }
