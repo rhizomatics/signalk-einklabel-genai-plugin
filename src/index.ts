@@ -4,7 +4,7 @@ import { registerLlmProvider as registerLlmProviderImpl, getLlmProvider as getLl
 import type { LlmProviderFactory as LlmProviderFactoryType, LlmSettings as LlmSettingsType } from "./llmProviderRegistry";
 
 /**
- * On `start()`, registers this plugin's `TemplateProvider` with the core `signalk-einklabel-plugin`
+ * When constructed, registers this plugin's `TemplateProvider` with the core `signalk-einklabel-plugin`
  * (`esl.registerTemplateProvider`, see `./templateProvider.ts` and `./plugin.ts`) - so its prompts show
  * up in the core plugin's own "Template" picker, suffixed "(GenAI)".
  */

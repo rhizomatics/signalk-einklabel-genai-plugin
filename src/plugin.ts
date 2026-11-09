@@ -36,8 +36,10 @@ export function createPlugin(app: ServerAPI): Plugin {
   // Updated by `start()` on every (re)start - `createTemplateProvider`'s functions all read through
   // this closure rather than capturing one fixed config object, so a saved config change takes effect
   // on the *next* repaint without needing the core plugin (which holds the actual repaint schedule) to
-  // know or care that anything changed on this side.
-  let currentConfig: PluginConfig = defaultConfig();
+  // know or care that anything changed on this side. `undefined` while the plugin isn't running: the
+  // provider stays registered (the core plugin has no way to unregister one, and the server constructs
+  // every installed plugin, enabled or not), so `render()` uses this to refuse LLM calls while disabled.
+  let currentConfig: PluginConfig | undefined;
 
   esl.registerTemplateProvider(createTemplateProvider(app, () => currentConfig));
 
@@ -121,6 +123,8 @@ export function createPlugin(app: ServerAPI): Plugin {
         runConnectionTest(app, currentConfig).catch((err) => app.debug(`connection test failed unexpectedly: ${(err as Error).message}`));
       }
     },
-    stop() {},
+    stop() {
+      currentConfig = undefined;
+    },
   };
 }
