@@ -30,14 +30,6 @@ version and it goes live when you approve it (`policies/signalk-alignment.md` in
 5. Approve the staged version: npmjs.com → package → **Staged Packages**, or
    `npm stage approve <stage-id>` (both need 2FA).
 
-6. Move the `latest` git tag (version tags never move):
-
-   ```bash
-   git fetch --tags
-   git tag -f latest v<VERSION>
-   git push -f origin latest
-   ```
-
 ### Pre-releases
 
 The npm dist-tag comes from the release tag: one containing `alpha`, `beta` or `rc` publishes under
